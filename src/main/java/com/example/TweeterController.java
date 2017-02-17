@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.RequestEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,24 +29,26 @@ public class TweeterController {
 	}
 
 	@GetMapping("/")
-	String timelines(Model model) {
+	String timelines(Model model, @AuthenticationPrincipal TweeterUser user) {
 		RequestEntity<?> request = RequestEntity.get(UriComponentsBuilder
 				.fromUri(tweeterApiUri).pathSegment("timelines").build().toUri()).build();
 		List<Tweet> tweets = restTemplate
 				.exchange(request, new ParameterizedTypeReference<List<Tweet>>() {
 				}).getBody();
 		model.addAttribute("tweets", tweets);
+		model.addAttribute("user", user);
 		return "tweets";
 	}
 
 	@GetMapping("/tweets")
-	String tweets(Model model) {
+	String tweets(Model model, @AuthenticationPrincipal TweeterUser user) {
 		RequestEntity<?> request = RequestEntity.get(UriComponentsBuilder
 				.fromUri(tweeterApiUri).pathSegment("tweets").build().toUri()).build();
 		List<Tweet> tweets = restTemplate
 				.exchange(request, new ParameterizedTypeReference<List<Tweet>>() {
 				}).getBody();
 		model.addAttribute("tweets", tweets);
+		model.addAttribute("user", user);
 		return "tweets";
 	}
 
