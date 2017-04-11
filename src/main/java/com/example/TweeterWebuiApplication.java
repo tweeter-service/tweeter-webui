@@ -1,15 +1,15 @@
 package com.example;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.oauth2.client.OAuth2ClientContext;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
-@EnableOAuth2Sso
 public class TweeterWebuiApplication {
 
 	public static void main(String[] args) {
@@ -17,8 +17,12 @@ public class TweeterWebuiApplication {
 	}
 
 	@Bean
-	OAuth2RestTemplate oauth2RestTemplate(OAuth2ClientContext oauth2ClientContext,
-										  OAuth2ProtectedResourceDetails details) {
-		return new OAuth2RestTemplate(details, oauth2ClientContext);
+	RestTemplate restTemplate(HttpServletRequest req) {
+		return new RestTemplateBuilder().interceptors((request, body, execution) -> {
+			String authorization = req.getHeader(HttpHeaders.AUTHORIZATION);
+			// pass through basic authorization
+			request.getHeaders().set(HttpHeaders.AUTHORIZATION, authorization);
+			return execution.execute(request, body);
+		}).build();
 	}
 }
